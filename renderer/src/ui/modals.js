@@ -283,6 +283,7 @@ export default class Modals {
     }
     
     static openModal(render, options = {}) {
+        if (typeof(this.ModalActions.openModal) === "function") return this.ModalActions.openModal(render);
         if (!this.hasInitialized) this.makeStack();
         options.modalKey = generateKey(options.modalKey);
         Events.emit("open-modal", render, options);
@@ -294,6 +295,7 @@ export default class Modals {
     }
 
     static closeModal(key) {
+        if (typeof(this.ModalActions.closeModal) === "function") return this.ModalActions.closeModal(key);
         if (!this.hasInitialized) this.makeStack();
         Events.emit("close-modal", key);
     }
