@@ -23,6 +23,7 @@ import ConfirmationModal from "./modals/confirmation";
 import CustomMarkdown from "./base/markdown";
 import ChangelogModal from "./modals/changelog";
 import ModalStack, {generateKey} from "./modals/stack";
+import Webpack from "@modules/api/webpack";
 
 
 export default class Modals {
@@ -142,8 +143,8 @@ export default class Modals {
         }
     }
 
-    static alert(title, content) {
-        this.showConfirmationModal(title, content, {cancelText: null});
+    static alert(title, content, options = {}) {
+        this.showConfirmationModal(title, content, {cancelText: null, ...options});
     }
 
     /**
@@ -200,7 +201,7 @@ export default class Modals {
                     if (props?.transitionState === 2) onClose?.();
                 }
             }, props), React.createElement(ErrorBoundary, {}, content)));
-        }, {modalKey: key});
+        }, {modalKey: key, ...options});
         return modalKey;
     }
 
@@ -215,13 +216,14 @@ export default class Modals {
         };
         this.openModal(props => {
             return React.createElement(ErrorBoundary, null, React.createElement(AddonErrorModal, Object.assign(options, props)));
-        });
+        }, options);
     }
 
     static showChangelogModal(options = {}) {
         const key = this.openModal(props => {
             return React.createElement(ErrorBoundary, null, React.createElement(ChangelogModal, Object.assign(options, props)));
-        });
+        }, options);
+
         return key;
     }
 
@@ -268,7 +270,7 @@ export default class Modals {
 
         return this.openModal(props => {
             return React.createElement(ErrorBoundary, null, React.createElement(ConfirmationModal, Object.assign(options, props), child));
-        });
+        }, options);
     }
 
 
@@ -281,11 +283,19 @@ export default class Modals {
     }
     
     static openModal(render, options = {}) {
-        if (typeof(this.ModalActions.openModal) === "function") return this.ModalActions.openModal(render);
         if (!this.hasInitialized) this.makeStack();
         options.modalKey = generateKey(options.modalKey);
         Events.emit("open-modal", render, options);
-        return options.modalKey;
+
+        return options.advanced ? {
+            id: options.modalKey, 
+            close: () => this.closeModal(options.modalKey)
+        } : options.modalKey
+    }
+
+    static closeModal(key) {
+        if (!this.hasInitialized) this.makeStack();
+        Events.emit("close-modal", key);
     }
 }
 

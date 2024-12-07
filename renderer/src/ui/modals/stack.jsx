@@ -64,10 +64,12 @@ export default function ModalStack() {
 
     useEffect(() => {
         Events.on("open-modal", addModal);
+        Events.on("close-modal", removeModal);
         return () => {
             Events.off("open-modal", addModal);
+            Events.off("close-modal", removeModal);
         };
-    }, [addModal]);
+    }, [addModal, removeModal]);
 
     return <TransitionGroup component={Fragment}>
             <Backdrop isVisible={!!modals.length} onClick={() => removeModal(modals[modals.length - 1].modalKey)} />
