@@ -283,16 +283,20 @@ export default class Modals {
     }
     
     static openModal(render, options = {}) {
-        if (typeof(this.ModalActions.openModal) === "function") return this.ModalActions.openModal(render);
-        if (!this.hasInitialized) this.makeStack();
         options.modalKey = generateKey(options.modalKey);
-        Events.emit("open-modal", render, options);
+        if (typeof(this.ModalActions.openModal) === "function") {
+            this.ModalActions.openModal(render);
+        }
+        else {
+            if (!this.hasInitialized) this.makeStack();
+            Events.emit("open-modal", render, options);
+        }
 
         return options.advanced ? {
             id: options.modalKey, 
             close: () => this.closeModal(options.modalKey)
         } : options.modalKey
-    }
+  }
 
     static closeModal(key) {
         if (typeof(this.ModalActions.closeModal) === "function") return this.ModalActions.closeModal(key);
