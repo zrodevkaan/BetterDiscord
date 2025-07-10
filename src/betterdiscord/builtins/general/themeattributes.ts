@@ -12,13 +12,15 @@ export default new class ThemeAttributes extends Builtin {
     get id() {return "themeAttributes";}
 
     async enabled() {
-        this.before(MessageComponent, "Z", (thisObject, [args]) => {
+        this.after(MessageComponent, "Z", (thisObject, [args], res) => {
             if (args?.["aria-roledescription"] !== "Message") return;
             const author = findInTree(args, (arg) => arg?.username, {walkable: ["props", "childrenMessageContent", "message", "author"]});
             const authorId = author?.id;
             if (!authorId) return;
-            args["data-author-id"] = authorId;
-            args["data-is-self"] = !!author.email;
+            const resLocation = findInTree(res,x=>x?.tabIndex,{walkable: ["props","children"]});
+
+            resLocation["data-author-id"] = authorId;
+            resLocation["data-is-self"] = !!author.email;
         });
         this.after(TabBarComponent?.Item?.prototype, "render", (thisObject, args, returnValue) => {
             returnValue.props["data-tab-id"] = thisObject?.props?.id;
