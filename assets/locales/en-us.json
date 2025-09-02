@@ -26,6 +26,14 @@
                     "name": "Settings Context Menu",
                     "note": "Adds a BetterDiscord subsection to the settings context menu."
                 },
+                "toolBar": {
+                    "name": "Toolbar API",
+                    "note": "Adds a BetterDiscord button in the channels toolbar."
+                },
+                "chatBar": {
+                    "name": "Chatbar Buttons API",
+                    "note": "Allows plugins to add custom buttons to your chatbar."
+                },
                 "themeAttributes": {
                     "name": "Theme Attributes",
                     "note": "Adds attributes to various elements to assist in theming."

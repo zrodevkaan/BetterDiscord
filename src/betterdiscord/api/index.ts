@@ -17,6 +17,7 @@ import ContextMenu from "./contextmenu";
 import fetch from "./fetch";
 import Logger from "./logger";
 import CommandAPI from "./commands";
+import {APIs} from "./apis";
 
 import ColorInput from "@ui/settings/components/color";
 import DropdownInput from "@ui/settings/components/dropdown";
@@ -108,6 +109,7 @@ export default class BdApi {
     DOM: DOM<true> = DOMAPI as DOM<true>;
     Logger: Logger<true> = DefaultLogger as Logger<true>;
     Commands: CommandAPI<true> = CommandsAPI as unknown as CommandAPI<true>;
+    APIS: typeof APIs;
     React = React;
     ReactDOM = ReactDOM;
     version = version;
@@ -145,6 +147,7 @@ export default class BdApi {
         this.DOM = new DOM(pluginName);
         this.Logger = new Logger(pluginName);
         this.Commands = new CommandAPI(pluginName);
+        this.APIs = new APIs(pluginName);
 
         bounded.set(pluginName, this);
     }
@@ -220,6 +223,12 @@ BdApi.DOM = DOMAPI;
  * @type ContextMenu
  */
 BdApi.ContextMenu = ContextMenuAPI;
+
+/**
+ * An instance of {@link APIs} for interacting with any BetterDiscord supported APIs
+ * @type APIs
+ */
+BdApi.APIs = APIs;
 
 /**
  * An set of react components plugins can make use of.
