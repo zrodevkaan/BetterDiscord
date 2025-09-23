@@ -19,18 +19,21 @@ export default new class ReactDevTools extends Builtin {
         this.showModal();
     }
 
-
     async initialize() {
         super.initialize();
 
-        let originalType = window.$r?.__originalFunction || window.$r;
+        let r = window.$r;
 
         Object.defineProperty(window, "$r", {
             get: () => {
-                return originalType;
+                if (!r) return;
+                return {
+                    ...r,
+                    type: r.type?.__originalFunction || r.type
+                };
             },
             set: (v) => {
-                originalType = v?.__originalFunction || v;
+                r = v;
             },
         });
     }
