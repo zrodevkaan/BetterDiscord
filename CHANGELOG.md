@@ -2,6 +2,35 @@
 
 This changelog starts with the restructured 1.0.0 release that happened after context isolation changes. The changelogs here should more-or-less mirror the ones that get shown in the client but probably with less formatting and pizzazz.
 
+1.13.5
+
+### Added
+- Added `data-speaking` attribute to VoiceUser in ThemeAttributes
+
+### Fixed
+- Fixed BdApi.Net.fetch not handling relative urls properly
+- BetterDiscord now properly checks for addon updates periodically
+- BetterDiscord now loads up correctly
+
+### Improved
+- Tweaked styles for InstallCSS
+- BetterDiscord's Dropdown Component was rewrote
+
+### Removed
+
+1.13.4
+
+### Fixed:
+- Fixed styles breaking in certain areas.
+- Fixed theme attributes from causing a bunch of lag.
+
+1.13.3
+
+### Fixed:
+- BetterDiscord Settings section now appears correctly in the settings menu
+- Fixed css to match Discord's latest changes
+- Context Menu patches fixed
+
 1.13.2
 
 ### Fixed:
