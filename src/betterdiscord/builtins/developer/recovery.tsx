@@ -20,8 +20,8 @@ const TEST_PLUGIN_REGEX = /betterdiscord:\/\/(plugins)\/(.*?).(\w+).js/;
 
 // TODO: arven if you get a chance
 async function attemptRecovery() {
-    const transitionTo = getByStrings(["transitionTo - Transitioning to"], {searchExports: true});
-    const modalModule = getMangled(`,["contextKey"]),`, {CloseAllModals: x => x.toString?.()?.includes(".key,") && x.toString?.()?.includes("getState();")});
+    const transitionTo = getByStrings(["transitionTo - Transitioning to"], {searchExports: true}) as (string) => void;
+    const modalModule = getByKeys(["openModal"]) as {closeAllModals: () => void};
 
     const recoverySteps = [
         {
@@ -37,7 +37,7 @@ async function attemptRecovery() {
             errorMessage: "Failed to route to main channel"
         },
         {
-            action: () => modalModule?.CloseAllModals(),
+            action: () => modalModule?.closeAllModals(),
             errorMessage: "Failed to close all modals"
         }
     ];
