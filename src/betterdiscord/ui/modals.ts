@@ -24,7 +24,7 @@ import ConfirmationModal, {type ConfirmationModalOptions} from "./modals/confirm
 import CustomMarkdown from "./base/markdown";
 import ChangelogModal, {type ChangelogProps} from "./modals/changelog";
 import ModalStack, {generateKey} from "./modals/stack";
-import {Filters, getMangled} from "@webpack";
+import {Filters, getByKeys, getMangled} from "@webpack";
 import type {ComponentType, ReactElement, ReactNode, RefObject} from "react";
 import type AddonError from "@structs/addonerror";
 
@@ -44,10 +44,7 @@ export default class Modals {
 
     static _ModalActions: ModalActions;
     static get ModalActions() {
-        return this._ModalActions ??= getMangled("onCloseRequest:null!=", {
-            openModal: Filters.byStrings("onCloseRequest:null!="),
-            closeModal: Filters.byStrings(".setState", ".getState()[")
-        }) as ModalActions;
+        return this._ModalActions ??= getByKeys(["openModal"]) as ModalActions;
     }
 
     static default(title: string, content: string | ReactElement | ReactElement[] | HTMLElement | Array<string | ReactElement>, buttons: Array<{danger?: boolean; label: string; action: (e?: MouseEvent) => void;}> = []) {
