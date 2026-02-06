@@ -37,7 +37,7 @@ async function attemptRecovery() {
             errorMessage: "Failed to route to main channel"
         },
         {
-            action: () => modalModule?.CloseAllModals(),
+            action: () => modalModule?.closeAllModals(),
             errorMessage: "Failed to close all modals"
         }
     ];
