@@ -35,13 +35,14 @@ import Text from "@ui/base/text";
 import Flex from "@ui/base/flex";
 import Button from "@ui/base/button";
 import Spinner from "@ui/spinner";
+import CommonModules from "@api/commonmodules.ts";
 
 import type ReactType from "react";
 import type ReactDOMBaseType from "react-dom";
 import type ReactDOMClientType from "react-dom/client";
+import ReactDOMModule from "@modules/reactdom.ts";
 
 type ReactDOMType = typeof ReactDOMBaseType & typeof ReactDOMClientType;
-
 
 const bounded = new Map();
 const PluginAPI = new AddonAPI(PluginManager);
@@ -91,7 +92,7 @@ const React: typeof ReactType = DiscordModules.React;
  * @type ReactDOM
  * @memberof BdApi
  */
-const ReactDOM: ReactDOMType = DiscordModules.ReactDOM;
+const ReactDOM: ReactDOMType = ReactDOMModule;
 
 /**
  * A reference string for BD's version.
@@ -163,7 +164,7 @@ export default class BdApi {
     get ReactUtils() {return ReactUtils;}
     get ContextMenu() {return ContextMenuAPI;}
     get Components() {return Components;}
-    get Common() {return CommonModules.CommonModules;};
+    get Common() {return CommonModules;};
     Net = {fetch};
 }
 
@@ -237,7 +238,7 @@ BdApi.Components = Components;
  * A set of common modules used internally by plugins.
  * @type CommonModules
  */
-BdApi.Common = CommonModules.CommonModules;
+BdApi.Common = CommonModules;
 
 /**
  * An instance of {@link CommandAPI} for adding slash commands.

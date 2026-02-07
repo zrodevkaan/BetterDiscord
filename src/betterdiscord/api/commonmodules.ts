@@ -1,163 +1,204 @@
-import data from "../webpack/modules.json" with {type: "json"};
-import {Filters, getBulkKeyed} from "@webpack";
-import Store from "@stores/base.ts";
-import request from "@polyfill/request.ts";
-import config from "@stores/config.ts";
+import {Filters, getBulk} from "@webpack";
 
-type FilterType = "byKeys" | "byStrings" | "bySource";
+const bulkModules = getBulk(
+    // FluxDispatch
+    {filter: Filters.byKeys(["_dispatch"]), searchExports: true},
+    // Parser
+    {filter: Filters.byKeys(["parseTopic"])},
+    // Popout
+    {filter: Filters.byStrings("Unsupported animation config: "), searchExports: true},
+    // MessageActions
+    {filter: Filters.byKeys(["editMessage"])},
+    // Clickable
+    {filter: Filters.byStrings("renderNonInteractive()"), searchExports: true},
+    // Slider
+    {filter: Filters.byStrings("markerPositions"), searchExports: true},
+    // Modal
+    {filter: Filters.byStrings("actionBarInputLayout"), searchExports: true},
+    // CloudUpload
+    {filter: Filters.byStrings("uploadFileToCloud"), searchExports: true},
+    // Moment
+    {filter: Filters.byKeys(["parseTwoDigitYear"])},
+    // Hljs
+    {filter: Filters.byKeys(["registerLanguage"])},
+    // Snowflake
+    {filter: Filters.byKeys(["extractTimestamp"])},
+    // Lodash
+    {filter: Filters.byKeys(["forEachRight"])},
+    // CssVars
+    {filter: Filters.byKeys(["unsafe_rawColors"])},
+    // Intl
+    {filter: Filters.byKeys(["intl"])},
+    // Flux
+    {filter: Filters.byKeys(["connectStores"])},
+    // Permissions
+    {filter: Filters.byKeys(["ADD_REACTIONS"]), searchExports: true},
+    // ComponentDispatch
+    {
+        filter: Filters.bySource("ComponentDispatchUtils"),
+        map: {
+            ComponentDispatch: Filters.byKeys(["_savedDispatches"])
+        }
+    },
+    // FormNotice
+    {filter: Filters.byStrings("HORIZONTAL_REVERSE", "imageData"), searchExports: true},
+    // ImageUtils
+    {filter: Filters.byKeys(["getChannelIconURL"])},
+    // ReactSpring
+    {filter: Filters.byKeys(["a", "animated"])},
+    // Fetching
+    {
+        filter: Filters.bySource("type:\"USER_PROFILE_FETCH_START\""),
+        map: {
+            fetchProfile: Filters.byStrings("USER_PROFILE_FETCH_START"),
+            getUser: Filters.byStrings("USER_UPDATE")
+        }
+    },
+    // ModalActions
+    {
+        filter: Filters.bySource(".modalKey?"),
+        map: {
+            openModalLazy: Filters.byStrings(".modalKey?"),
+            openModal: Filters.byStrings(",instant:"),
+            closeModal: Filters.byStrings(".onCloseCallback()"),
+            closeAllModals: Filters.byStrings(".getState();for"),
+            updateModal: Filters.byStrings("arguments.length>4&&void 0")
+        }
+    },
+    // Navigation
+    {
+        filter: Filters.bySource("Transitioning to"),
+        map: {
+            transitionTo: Filters.byStrings("transitionTo - Transitioning to"),
+            replace: Filters.byStrings("Replacing route"),
+            goBack: Filters.byStrings(".goBack()"),
+            goForward: Filters.byStrings(".goForward()"),
+            transitionToGuild: Filters.byStrings("transitionToGuild")
+        }
+    },
+    // LoadingPopout
+    {
+        filter: Filters.byRegex(/className:.{1}\..{1},children:\(0,.{1}\.jsx\)\(.{1}\..{1,3},{type:.{1}\..{3}\.SPINNING_CIRCLE\}\)/),
+        searchExports: true
+    },
+    // Progress
+    {filter: Filters.byStrings("percent", "foregroundGradientColor"), searchExports: true},
+    // Spinner
+    {filter: Filters.byStrings("=\"wanderingCubes\""), searchExports: true},
+    // TextArea
+    {filter: Filters.byStrings("getPaddingRight(){let"), searchExports: true},
+    // CopyInput
+    {filter: Filters.byStrings("select(){this"), searchExports: true},
+    // SearchableSelect
+    {filter: Filters.byStrings("SearchableSelect"), searchExports: true},
+    // Switch
+    {filter: Filters.byStrings("xMinYMid meet"), searchExports: true},
+    // FormSwitch
+    {filter: Filters.byStrings("mana-toggle-inputs", "switchIconsEnabled:"), searchExports: true},
+    // Text
+    {filter: Filters.byStrings("data-excessive-heading-level"), searchExports: true},
+    // Flex
+    {filter: Filters.byKeys(["Justify"]), searchExports: true},
+    // Scroller
+    {filter: Filters.byStrings("scrollbarType", "scrollerRef"), searchExports: true},
+    // ProgressCircle
+    {filter: Filters.byStrings("renderCircle(){let{strokeSize"), searchExports: true},
+    // KeyCombo
+    {filter: Filters.byStrings("{let{shortcut:"), searchExports: true},
+    // Avatar
+    {filter: Filters.byStrings("typingIndicatorRef", "statusBackdropColor"), searchExports: true},
+    // Slides
+    {filter: Filters.byStrings("contentDisplay"), searchExports: true},
+    // AnimatedAvatar
+    {filter: Filters.byStrings("avatarTooltipAsset"), searchExports: true},
+    // Button
+    {filter: Filters.byStrings("pfChQ"), searchExports: true},
+    // CalendarPicker
+    {filter: Filters.byStrings("react-datepicker__day[tabindex=\"0\"]"), searchExports: true},
+    // Color
+    {filter: Filters.byKeys(["Color"]), searchExports: true},
+    // Electron
+    {filter: Filters.byKeys(["setBadge"])}
+);
 
-interface ModuleMapEntry {
-    type: Exclude<FilterType, "bySource">;
-    properties: string[];
-}
+const [
+    FluxDispatch, Parser, Popout, MessageActions, Clickable, Slider, Modal,
+    CloudUpload, Moment, Hljs, Snowflake, Lodash, CssVars, Intl, Flux,
+    Permissions, ComponentDispatchModule, FormNotice, ImageUtils,
+    ReactSpring, FetchingModule, ModalActionsModule, NavigationModule, LoadingPopout, Progress,
+    Spinner, TextArea, CopyInput, SearchableSelect, Switch, FormSwitch, Text,
+    Flex, Scroller, ProgressCircle, KeyCombo, Avatar, Slides, AnimatedAvatar,
+    Button, CalendarPicker, Color, Electron
+] = bulkModules;
 
-interface ModuleEntry {
-    type: FilterType;
-    properties: string[];
-    space?: string;
-    searchExports?: boolean;
-    searchDefault?: boolean;
-    map?: Record<string, ModuleMapEntry>;
-}
-
-type ModuleDefinition = Record<string, ModuleEntry>;
-type ModuleData = ModuleDefinition[];
-
-type BuiltQuery = ModuleEntry & {
-    filter: unknown;
-    map?: Record<string, unknown>;
+const ComponentDispatch = ComponentDispatchModule?.ComponentDispatch;
+const Fetching = {
+    fetchProfile: FetchingModule?.fetchProfile,
+    getUser: FetchingModule?.getUser
 };
 
-type BuiltQueries = Record<string, BuiltQuery>;
-type BulkResult = Record<string, unknown>;
-type OrganizedModules = Record<string, Record<string, unknown>>;
+const ModalActions = {
+    openModalLazy: ModalActionsModule?.openModalLazy,
+    openModal: ModalActionsModule?.openModal,
+    closeModal: ModalActionsModule?.closeModal,
+    closeAllModals: ModalActionsModule?.closeAllModals,
+    updateModal: ModalActionsModule?.updateModal
+};
 
-const ModuleStore = new class ModuleStoreClass extends Store {
-    private _modules: OrganizedModules | null = null;
-    private _eTag: string | null = null;
+const Navigation = {
+    transitionTo: NavigationModule?.transitionTo,
+    replace: NavigationModule?.replace,
+    goBack: NavigationModule?.goBack,
+    goForward: NavigationModule?.goForward,
+    transitionToGuild: NavigationModule?.transitionToGuild
+};
 
-    get modules(): OrganizedModules | null {
-        return this._modules;
+export default {
+    Helpers: {
+        FluxDispatch,
+        Parser,
+        MessageActions,
+        CloudUpload,
+        Moment,
+        Hljs,
+        Snowflake,
+        Lodash,
+        CssVars,
+        Intl,
+        Flux,
+        Permissions,
+        ComponentDispatch,
+        ImageUtils,
+        ReactSpring,
+        Fetching,
+        ModalActions,
+        Navigation,
+        Color,
+        Electron
+    },
+    Components: {
+        Popout,
+        Clickable,
+        Slider,
+        Modal,
+        FormNotice,
+        LoadingPopout,
+        Progress,
+        Spinner,
+        TextArea,
+        CopyInput,
+        SearchableSelect,
+        Switch,
+        FormSwitch,
+        Text,
+        Flex,
+        Scroller,
+        ProgressCircle,
+        KeyCombo,
+        Avatar,
+        Slides,
+        AnimatedAvatar,
+        Button,
+        CalendarPicker
     }
-
-    set modules(modules: OrganizedModules) {
-        this._modules = modules;
-        this.emitChange();
-    }
-
-    get eTag(): string | null {
-        return this._eTag;
-    }
-
-    set eTag(etag: string) {
-        this._eTag = etag;
-        this.emitChange();
-    }
-}();
-
-class CommonModules {
-    constructor() {
-        this.build(data as unknown as ModuleData);
-
-        if (config.isCanary) {
-            (window as any).BetterDiscordCommonModules = {
-                Modules: ModuleStore.modules,
-                refetch: this.refetch.bind(this),
-                hasUndefined: this.hasUndefined.bind(this),
-                ModuleStore
-            };
-        }
-    }
-
-    private buildQueries(modules: ModuleData): BuiltQueries {
-        const queries: BuiltQueries = {};
-        for (const module of modules) {
-            for (const [key, value] of Object.entries(module)) {
-                queries[key] = {
-                    ...value,
-                    filter: value.type === "byKeys"
-                        ? Filters.byKeys(value.properties)
-                        : Filters.byStrings(...value.properties),
-                    map: value.map && Object.fromEntries(
-                        Object.entries(value.map).map(([k, v]) => [
-                            k,
-                            v.type === "byKeys"
-                                ? Filters.byKeys(v.properties)
-                                : Filters.byStrings(...v.properties)
-                        ])
-                    )
-                };
-            }
-        }
-        return queries;
-    }
-
-    private organize(modules: ModuleData, result: BulkResult): OrganizedModules {
-        const out: OrganizedModules = {};
-        for (const module of modules) {
-            for (const [key, value] of Object.entries(module)) {
-                if (!value.space) continue;
-                out[value.space] ??= {};
-                out[value.space][key] = result[key];
-            }
-        }
-        return out;
-    }
-
-    private _hasUndefined(value: unknown, seen: Set<unknown> = new Set<unknown>()): boolean {
-        if (value === undefined) return true;
-        if (value === null || typeof value !== "object") return false;
-        if (seen.has(value)) return false;
-        seen.add(value);
-        if (Array.isArray(value)) return value.some(v => this._hasUndefined(v, seen));
-        return Object.keys(value as object).some(
-            k => this._hasUndefined((value as Record<string, unknown>)[k], seen)
-        );
-    }
-
-    hasUndefined(): boolean {
-        return this._hasUndefined(ModuleStore.modules);
-    }
-
-    private build(modules: ModuleData): OrganizedModules {
-        const result = getBulkKeyed(this.buildQueries(modules)) as BulkResult;
-        const organized = this.organize(modules, result);
-
-        const target = ModuleStore.modules ?? {};
-        for (const key in target) delete target[key];
-        Object.assign(target, organized);
-
-        ModuleStore.modules = target;
-        return target;
-    }
-
-    async refetch(url: string): Promise<boolean> {
-        const res = await new Promise<{ res: any; body: string }>((resolve, reject) => {
-            request(url, {}, (err, res, body) => {
-                if (err) return reject(err);
-                resolve({res, body});
-            });
-        });
-
-        let etag: string | undefined = res.res.headers.etag;
-
-        if (etag?.startsWith("W/")) etag = etag.replace(/^W\//, "");
-
-        if (etag && etag === ModuleStore.eTag) return false;
-
-        const fetched = JSON.parse(res.body) as ModuleData;
-        const next = this.build(fetched);
-
-        if (this._hasUndefined(next)) ModuleStore.modules = next;
-
-        if (etag) ModuleStore.eTag = etag;
-
-        return true;
-    }
-
-    get CommonModules(): OrganizedModules {
-        return ModuleStore.modules as OrganizedModules;
-    }
-}
-
-export default new CommonModules();
+};
