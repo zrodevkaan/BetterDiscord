@@ -90,7 +90,7 @@ export function getMangled<T extends object>(
         filter = bySource(filter);
     }
 
-    let module = typeof filter === "number" ? getById(filter) : getModule<any>(filter, options);
+    let module = typeof filter === "number" ? getById(filter, options) : getModule<any>(filter, options);
     if (!module) return {} as T;
     if (options.raw) module = module.exports;
 

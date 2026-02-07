@@ -9,7 +9,7 @@ import Toasts from "@stores/toasts";
 import pluginmanager from "@modules/pluginmanager";
 import IPC from "@modules/ipc";
 import Modals from "@ui/modals";
-import {getByPrototypes, getByStrings, getMangled} from "@webpack";
+import {getByPrototypes, getByStrings} from "@webpack";
 import NotificationUIInstance from "@ui/notifications";
 import config from "@stores/config";
 import {Logo} from "@ui/logo";
@@ -21,9 +21,6 @@ const TEST_PLUGIN_REGEX = /betterdiscord:\/\/(plugins)\/(.*?).(\w+).js/;
 // TODO: arven if you get a chance
 async function attemptRecovery() {
     const transitionTo = getByStrings(["transitionTo - Transitioning to"], {searchExports: true, firstId: 976860, cacheId: "core-recovery-transitionTo"});
-    const modalModule = getMangled(`,["contextKey"]),`, {
-        CloseAllModals: x => x.toString?.()?.includes(".key,") && x.toString?.()?.includes("getState();")
-    }, {firstId: 192308, cacheId: "core-recovery-modal"});
 
     const recoverySteps = [
         {
@@ -39,7 +36,7 @@ async function attemptRecovery() {
             errorMessage: "Failed to route to main channel"
         },
         {
-            action: () => modalModule?.CloseAllModals(),
+            action: () => Modals.ModalActions?.closeAllModals?.(),
             errorMessage: "Failed to close all modals"
         }
     ];

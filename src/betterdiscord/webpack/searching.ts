@@ -71,6 +71,8 @@ export function getModule<T>(filter: Webpack.Filter, options: Webpack.Options = 
         }
     }
 
+    // console.log("WEBPACK FAIL", arguments);
+
     if (options.fatal) throw makeException();
     return undefined;
 }
