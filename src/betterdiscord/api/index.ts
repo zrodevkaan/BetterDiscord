@@ -39,7 +39,6 @@ import Spinner from "@ui/spinner";
 import type ReactType from "react";
 import type ReactDOMBaseType from "react-dom";
 import type ReactDOMClientType from "react-dom/client";
-import CommonModules from "@api/commonmodules.ts";
 
 type ReactDOMType = typeof ReactDOMBaseType & typeof ReactDOMClientType;
 

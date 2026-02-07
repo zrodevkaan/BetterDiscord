@@ -24,6 +24,8 @@ export type Options = {
     searchDefault?: boolean,
     raw?: boolean;
     fatal?: boolean;
+    firstId?: PropertyKey;
+    cacheId?: string | null;
 };
 
 export type BulkQueries = Options & {
@@ -47,5 +49,5 @@ export type ModuleWithoutEffect = [
     Record<PropertyKey, RawModule>
 ];
 
-export type DefaultKey = "default" | "Z" | "ZP";
+export type DefaultKey = "default" | "A" | "Ay";
 // }

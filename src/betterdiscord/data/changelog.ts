@@ -11,12 +11,28 @@ export default {
     blurb: "Hotfix to squash some bugs.",
     changes: [
         {
+            title: "New Features",
+            type: "new",
+            items: [
+                "New Webpack cache system for faster loading times; you will see much faster loading times after the first launch with this update.",
+            ]
+        },
+        {
             title: "Bugs Squashed",
             type: "fixed",
             items: [
-                "Fixed styles breaking in certain areas.",
-                "Fixed theme attributes from causing a bunch of lag."
+                "Fixed `tags` button appearing behind other elements in the Addon Store",
+                "Fixed downloading addons via the addon store",
+                "Fixed dropdowns with lots of options not allowing you to scroll through all of the options",
+                "Minor UI fixes",
             ]
         },
+        {
+            title: "Improvements",
+            type: "improved",
+            items: [
+                "Dropdowns now automatically scroll to the selected option when opened",
+            ]
+        }
     ]
 } as ChangelogProps;
