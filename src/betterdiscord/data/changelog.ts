@@ -11,28 +11,28 @@ export default {
     blurb: "Hotfix to squash some bugs.",
     changes: [
         {
+            title: "New Features",
+            type: "new",
+            items: [
+                "New Webpack cache system for faster loading times; you will see much faster loading times after the first launch with this update.",
+            ]
+        },
+        {
             title: "Bugs Squashed",
             type: "fixed",
             items: [
-                "Fixed BdApi.Net.fetch not handling relative urls properly.",
-                "BetterDiscord now properly checks for addon updates periodically.",
-                "BetterDiscord now loads up correctly.",
+                "Fixed `tags` button appearing behind other elements in the Addon Store",
+                "Fixed downloading addons via the addon store",
+                "Fixed dropdowns with lots of options not allowing you to scroll through all of the options",
+                "Minor UI fixes",
             ]
         },
         {
             title: "Improvements",
             type: "improved",
             items: [
-                "Tweaked styles for InstallCSS.",
-                "BetterDiscord's Dropdown Component was rewrote.",
+                "Dropdowns now automatically scroll to the selected option when opened",
             ]
-        },
-        {
-            title: "Additions",
-            type: "added",
-            items: [
-                "Added `data-speaking` attribute to VoiceUser in ThemeAttributes"
-            ]
-        },
+        }
     ]
 } as ChangelogProps;
