@@ -103,7 +103,7 @@ function TagDropdown({type, selected, onChange}) {
                 ref={optionsRef}
                 popover="auto"
                 role="listbox"
-                className="bd-select-options"
+                className="bd-select-options bd-scroller-thin"
             >
                 {tags.map((tag, index) => {
                     const isSelected = selectedTags.includes(tag);

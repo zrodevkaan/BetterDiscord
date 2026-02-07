@@ -341,7 +341,13 @@ export default new class SettingsRenderer {
                                 <div
                                     className="bd-settings-page-title"
                                     ref={(v) => {
-                                        if (v?.parentElement?.parentElement) {
+                                        const flex = v?.closest("div[data-wrap][data-full-width] > nav")?.parentElement as HTMLElement;
+
+                                        if (flex) {
+                                            flex.classList.add("bd-settings-title-extend");
+                                            setNode(flex);
+                                        }
+                                        else if (v?.parentElement?.parentElement) {
                                             v.parentElement.parentElement.classList.add("bd-settings-title-extend");
                                             setNode(v.parentElement.parentElement);
                                         }
