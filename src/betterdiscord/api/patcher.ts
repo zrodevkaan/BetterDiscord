@@ -1,6 +1,7 @@
 import Logger from "@common/logger";
 
 import {default as MainPatcher, type AfterCallback, type BeforeCallback, type InsteadCallback} from "@modules/patcher";
+import ChatButtons from "@api/apis/chatbuttons";
 
 type BeforeArguments<Bounded extends boolean, M extends object, K extends Extract<keyof M, string>> = [
     ...(Bounded extends false ? [caller: string] : []),
@@ -34,9 +35,16 @@ function isModuleInvalid(moduleToPatch: any): boolean {
  */
 class Patcher<Bounded extends boolean> {
     #callerName = "";
+    ChatButtons: ChatButtons<Bounded>;
+
     constructor(callerName?: string) {
-        if (!callerName) return;
+        if (!callerName) {
+            // thanks doggy.
+            this.ChatButtons = new ChatButtons() as ChatButtons<Bounded>;
+            return;
+        }
         this.#callerName = callerName;
+        this.ChatButtons = new ChatButtons(callerName) as ChatButtons<Bounded>;
     }
 
     /**
