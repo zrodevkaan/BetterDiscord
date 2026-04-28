@@ -1,8 +1,9 @@
-import {Filters, getByKeys, getMangled, getModule, webpackRequire} from "@webpack";
+import {Filters, getByKeys, getLazyByKeys, getMangled, getModule, webpackRequire} from "@webpack";
 import Logger from "@common/logger";
 import React from "@modules/react";
 import DiscordModules from "@modules/discordmodules";
 import NodePatcher from "@modules/nodepatcher";
+import DOMManager from "@modules/dommanager";
 
 
 let startupComplete = false;
@@ -10,7 +11,7 @@ let startupComplete = false;
 // TODO: actually do the typing
 // https://github.com/doggybootsy/vx/blob/main/packages/mod/src/betterdiscord/context-menu.tsx
 // https://github.com/doggybootsy/vx/blob/main/packages/mod/src/api/menu/components.ts
-const ModulesBundle = getByKeys(["MenuItem", "Menu"]);
+const ModulesBundle = getByKeys(["MenuItem", "Menu"], {cacheId: "core-contextmenu-ModulesBundle"});
 const MenuComponents = {
     Separator: ModulesBundle?.MenuSeparator,
     CheckboxItem: ModulesBundle?.MenuCheckboxItem,
@@ -76,7 +77,11 @@ if (!startupComplete) {
         MenuComponents.Item ??= contextMenuComponents[matchB[matchB[2] === "customitem" ? 1 : 3]];
     }
 
-    MenuComponents.Menu ??= getModule(Filters.byStrings("getContainerProps()", ".keyboardModeEnabled&&null!="), {searchExports: true});
+    MenuComponents.Menu ??= getModule(Filters.byStrings("getContainerProps()", ".keyboardModeEnabled&&null!="), {
+        searchExports: true,
+        firstId: 397927,
+        cacheId: "core-contextmenu-menu"
+    });
 }
 
 startupComplete = Object.values(MenuComponents).every(v => v);
@@ -88,7 +93,7 @@ const ContextMenuActions = (() => {
         Object.assign(out, getMangled(Filters.bySource("new DOMRect", "CONTEXT_MENU_CLOSE"), {
             closeContextMenu: Filters.byStrings("CONTEXT_MENU_CLOSE"),
             openContextMenu: Filters.byStrings("renderLazy")
-        }, {searchDefault: false}));
+        }, {searchDefault: false, cacheId: "core-contextmenu-Actions"}));
 
         startupComplete &&= typeof (out.closeContextMenu) === "function" && typeof (out.openContextMenu) === "function";
     }
@@ -157,6 +162,23 @@ function globToRegExp(glob: string) {
 const nodePatcher = new NodePatcher();
 
 class MenuPatcher {
+    private static async contextMenuFixForLucide() {
+        // Hopefully this will be faster than using css class selectors
+        const menuClasses = await getLazyByKeys<Record<string, string>>(["colorDefault", "focused"], {
+            cacheId: "core-contextmenu-classes"
+        });
+
+        // Discord manually sets the fill here, so we are reverting it back to the HTML tag
+        // .colorDefault.focused:not(.checkboxContainer) path {fill: var(--interactive-text-active)}
+        // .colorDanger.focused:not(.checkboxContainer) path {fill: var(--text-feedback-critical)}
+
+        DOMManager.injectStyle("bd-lucide-context-menu-fix", `
+            :where(.${menuClasses!.colorDefault}, ${menuClasses!.colorDanger}).${menuClasses!.focused}:not(.${menuClasses!.checkboxContainer}) .lucide:not(.lucide-betterdiscord) path {
+                fill: revert;
+            }
+        `);
+    }
+
     static MAX_PATCH_ITERATIONS = 10;
 
     static patches: {
@@ -188,6 +210,8 @@ class MenuPatcher {
 
     static initialize() {
         if (!startupComplete) return Logger.warn("ContextMenu~Patcher", "Startup wasn't successful, aborting initialization.");
+
+        this.contextMenuFixForLucide();
 
         DiscordModules.Dispatcher.addInterceptor<{type: "CONTEXT_MENU_OPEN", contextMenu: ContextMenuObject;}>((event) => {
             if (event.type === "CONTEXT_MENU_OPEN") {

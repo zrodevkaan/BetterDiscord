@@ -1,6 +1,5 @@
 import React from "@modules/react";
 import DiscordModules from "@modules/discordmodules";
-import {getModule} from "@webpack";
 import type {Rules, SimpleMarkdown} from "discord/modules";
 import type {ComponentClass, PropsWithChildren} from "react";
 
@@ -8,12 +7,12 @@ import type {ComponentClass, PropsWithChildren} from "react";
 let DiscordMarkdown: ComponentClass<PropsWithChildren<{className: string; parser: ReturnType<SimpleMarkdown["parserFor"]>; output: ReturnType<SimpleMarkdown["reactFor"]>;}>> & {rules: Rules;}, rules: Rules;
 
 function setupMarkdown() {
-    DiscordMarkdown = getModule(m => m?.prototype?.render && m.rules)!;
+    DiscordMarkdown = DiscordModules.DiscordMarkdown;
     rules = {} as Rules;
     if (DiscordMarkdown) {
         rules = {
             ...DiscordMarkdown.rules,
-            link: DiscordModules.SimpleMarkdown!.defaultRules.link
+            link: DiscordModules.SimpleMarkdownWrapper!.defaultRules.link
         };
 
         const originalLink = rules.link?.react;
@@ -34,8 +33,8 @@ export default function Markdown({className, children}: PropsWithChildren<{class
 
     return <DiscordMarkdown
         className={className ?? ""}
-        parser={DiscordModules.SimpleMarkdown!.parserFor(rules)}
-        output={DiscordModules.SimpleMarkdown!.reactFor(DiscordModules.SimpleMarkdown!.ruleOutput(rules, "react"))}
+        parser={DiscordModules.SimpleMarkdownWrapper!.parserFor(rules)}
+        output={DiscordModules.SimpleMarkdownWrapper!.reactFor(DiscordModules.SimpleMarkdownWrapper!.ruleOutput(rules, "react"))}
     >
         {children}
     </DiscordMarkdown>;

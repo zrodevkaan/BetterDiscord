@@ -14,13 +14,18 @@ import CloseButton from "./close";
 import SimpleMarkdownExt from "@structs/markdown";
 import Modals from "@ui/modals";
 import {GithubIcon, TwitterIcon} from "lucide-react";
-import {getByKeys} from "@webpack";
 import type {MouseEvent, ReactNode} from "react";
+import {getByKeys} from "@webpack";
+import ipc from "@modules/ipc";
 
 const {useMemo} = React;
 
 
-const AnchorClasses: {anchor: string; anchorUnderlineOnHover: string;} = getByKeys(["anchorUnderlineOnHover"]) || {anchor: "anchor-3Z-8Bb", anchorUnderlineOnHover: "anchorUnderlineOnHover-2ESHQB"};
+const AnchorClasses: {anchor: string; anchorUnderlineOnHover: string;} = getByKeys(["anchorUnderlineOnHover"], {
+    firstId: 820162,
+    cacheId: "core-changelog-anchorClasses"
+}) || {anchor: "anchor-3Z-8Bb", anchorUnderlineOnHover: "anchorUnderlineOnHover-2ESHQB"};
+
 const joinSupportServer = (click: MouseEvent) => {
     click.preventDefault();
     click.stopPropagation();
@@ -28,8 +33,19 @@ const joinSupportServer = (click: MouseEvent) => {
     DiscordModules.Dispatcher?.dispatch({type: "LAYER_POP"});
 };
 
+const toggleAllowingOtherClientMods = async (click: MouseEvent) => {
+    // if triple click toggle it
+    if (click.detail === 3) {
+        click.preventDefault();
+        click.stopPropagation();
+
+        await ipc.allowPreloadOverride.toggle();
+        ipc.relaunch();
+    }
+};
+
 const supportLink = <a className={`${AnchorClasses.anchor} ${AnchorClasses.anchorUnderlineOnHover}`} onClick={joinSupportServer}>Join our Discord Server.</a>;
-const defaultFooter = <Text>Need support? {supportLink}</Text>;
+const defaultFooter = <Text><span onClick={toggleAllowingOtherClientMods}>Need support?</span> {supportLink}</Text>;
 
 const twitter = <DiscordModules.Tooltip color="primary" position="top" text={t("Socials.twitter")}>
     {p => <a {...p} className="bd-social" href="https://x.com/_BetterDiscord_" rel="noopener noreferrer" target="_blank">

@@ -2,6 +2,53 @@
 
 This changelog starts with the restructured 1.0.0 release that happened after context isolation changes. The changelogs here should more-or-less mirror the ones that get shown in the client but probably with less formatting and pizzazz.
 
+1.13.12
+### Fixed
+- BetterDiscord now loads
+
+1.13.11
+### Improvements
+- Dropdowns now close after selecting an option
+- Dropdowns do not display the scrollbar when its not needed
+- Better handling of other client mods
+
+### Fixed
+- Fix for lazy listeners firing before class modules get interpolated
+
+1.13.10
+### Fixed
+- Fixed crashing when trying to view BetterDiscord's custom setting tabs
+
+1.13.9
+### Fixed
+- Fixes BD's items in the settings cog context-menu
+- The changelog button was at the bottom of the bd section
+- Hovering over a bd section would cause the to get filled instead of changing the color
+- Fixes Net.fetch from removing forbidden headers like User-Agent because of `new Request
+- Possible fix for addon store indefinitely loading - please report if you still have this issue
+
+1.13.8
+### Fixed
+- BetterDiscord now loads on macOS and Linux.
+
+### Added
+- Added `--avatar-url-[size]` to avatars for theme attributes.
+- Added a bunch of new theme attributes to messages.
+- Added an utility for developers to easily patch react elements.
+
+1.13.7
+### Added
+- New Webpack cache system for faster loading times; you will see much faster loading times after the first launch with this update.
+
+### Fixed
+- Fixed `tags` button appearing behind other elements in the Addon Store
+- Fixed downloading addons via the addon store
+- Fixed dropdowns with lots of options not allowing you to scroll through all of the options
+- Minor UI fixes
+
+### Improvements
+- Dropdowns now automatically scroll to the selected option when opened
+
 1.13.6
 
 ### Fixed
