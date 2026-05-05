@@ -65,7 +65,8 @@ function toStringFunction(fn: (...args: any[]) => any): string {
                     const kid = id.toString();
                     const nid = typeof id === "symbol" ? NaN : Number(id);
 
-                    const path = isNaN(nid) ? `misc/${kid}.js` : `${Math.floor(nid / 1_000)}/${kid}.js`;
+                    const iid = Math.floor(nid / 1_000);
+                    const path = isNaN(nid) ? `misc/${kid}.js` : `${iid}/${kid}.js`;
 
                     if (ast.body[0]?.type !== "ExpressionStatement" || ast.body[0].expression.type !== "FunctionExpression") {
                         return rawModule = trueOriginal;
@@ -130,6 +131,8 @@ function toStringFunction(fn: (...args: any[]) => any): string {
                     stringedModule = `(()=>
 function(){
 /*
+    File Path: ${iid}
+    Load index ID ${iid}
     Module Id: ${typeof id === "symbol" ? `Symbol(${id.description})` : id}
     Exposed ${vars.length} variables
     Is Probably Class Module: ${isClassModule}
