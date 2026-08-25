@@ -93,7 +93,7 @@ export class Addon {
     likes: number;
     downloads: number;
     tags: string[];
-    thumbnail: string | null;
+    private thumbnailURL: string | null | undefined;
     releaseDate: Date;
     lastModified: Date;
     guild: Guild | null;
@@ -124,7 +124,7 @@ export class Addon {
             cached.version = addon.version;
             cached.description = addon.description;
             cached.tags = addon.tags;
-            cached.thumbnail = Web.resources.thumbnail(addon.thumbnail_url);
+            cached.thumbnailURL = addon.thumbnail_url;
 
             cached._addon = addon;
 
@@ -146,7 +146,7 @@ export class Addon {
 
         this.type = addon.type;
 
-        this.thumbnail = Web.resources.thumbnail(addon.thumbnail_url);
+        this.thumbnailURL = addon.thumbnail_url;
         this.avatar = `https://avatars.githubusercontent.com/u/${addon.author.github_id}?v=4`;
         this.author = addon.author.display_name;
 
@@ -171,6 +171,10 @@ export class Addon {
         this._addon = addon;
 
         Addon.cache[addon.id] = this;
+    }
+
+    public get thumbnail() {
+        return Web.resources.thumbnail(this.thumbnailURL);
     }
 
     /**
@@ -236,7 +240,7 @@ export class Addon {
             return;
         }
 
-        const install = (shouldEnable: boolean) => new Promise<void>((resolve, reject) => {
+        const install = (shouldEnable: boolean) => new Promise<void>((resolve) => {
             request(Web.redirects.github(this.id.toString()), {
                 headers: {
                     "X-Store-Download": this.name,
@@ -277,8 +281,6 @@ export class Addon {
                     Toasts.show(t("Addons.failedToDownload", {context: this.type, name: this.name}), {
                         type: "error"
                     });
-
-                    reject(error);
                 }
                 finally {
                     resolve();
@@ -299,9 +301,10 @@ export class Addon {
             const key = Modals.ModalActions.openModal((props) => React.createElement(InstallModal, {
                 ...props,
                 addon: this,
-                install: (shouldEnable: boolean) => {
+                install: async (shouldEnable: boolean) => {
                     installing = true;
-                    return install(shouldEnable);
+                    await install(shouldEnable);
+                    Modals.ModalActions.closeModal(key);
                 }
             }), {
                 onCloseCallback: onFinish,
