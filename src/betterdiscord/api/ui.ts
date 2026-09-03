@@ -8,13 +8,14 @@ import Group, {buildSetting, type ButtonSetting, type CustomSetting, type GroupO
 import React, {useState, type ReactElement} from "react";
 import ErrorBoundary from "@ui/errorboundary";
 import Settings from "@stores/settings";
-import NotificationUI, {type Notification} from "@ui/notifications";
+import {type Notification} from "@ui/notifications";
 import type {ChangelogProps} from "@ui/modals/changelog";
 import type {DialogOptions} from "@common/types/ipc";
 import type {Setting, SettingsCategory} from "@data/settings";
 import type {ConfirmationModalOptions} from "@ui/modals/confirmation";
 import type {FloatingWindowProps} from "@ui/floating/window";
 import FloatingWindows from "@ui/floatingwindows";
+import Notifications from "@stores/notifications";
 
 export interface SettingsPanelProps {
     /** An array of settings to show */
@@ -68,21 +69,22 @@ function SettingsBuilderUI({settings, onChange, onDrawerToggle, getDrawerState}:
                     if (x.enableWith) disabled = subgroup[x.enableWith];
                     if (x.disableWith) disabled = !subgroup[x.disableWith];
 
-                    if (x.type !== "switch") return {...x, defaultValue: value, disabled};
-
                     return {
                         ...x,
                         defaultValue: value,
                         onChange(newValue: any) {
-                            setSwitchStates(v => ({
-                                ...v,
-                                [setting.id]: {
-                                    ...v[setting.id] as Record<string, boolean>,
-                                    [x.id]: newValue
-                                }
-                            }));
+                            if (x.type === "switch") {
+                                setSwitchStates(v => ({
+                                    ...v,
+                                    [setting.id]: {
+                                        ...v[setting.id] as Record<string, boolean>,
+                                        [x.id]: newValue
+                                    }
+                                }));
+                            }
 
                             x.onChange?.(newValue as never);
+                            onChange?.(setting.id, x.id, newValue);
                         },
                         disabled
                     };
@@ -101,15 +103,12 @@ function SettingsBuilderUI({settings, onChange, onDrawerToggle, getDrawerState}:
         const {value, ...x} = setting;
 
         // @ts-expect-error ts is annoying
-        if (setting.type !== "switch") return buildSetting({...x, defaultValue: value, disabled});
-
-        // @ts-expect-error ts is annoying
         return buildSetting({
             ...x,
             disabled,
             defaultValue: value,
             onChange: (newValue: any) => {
-                setSwitchStates(v => ({...v, [setting.id]: newValue}));
+                if (setting.type === "switch") setSwitchStates(v => ({...v, [setting.id]: newValue}));
 
                 setting?.onChange?.(newValue as never);
                 onChange?.(null, setting.id, newValue);
@@ -154,7 +153,7 @@ class UI {
 
         const finalNotification = {...defaultObj, ...options};
 
-        return NotificationUI.show(finalNotification);
+        return Notifications.show(finalNotification);
     }
 
     /**
