@@ -1,4 +1,4 @@
-import {Filters, getByKeys, getLazyByKeys, getMangled, getModule, webpackRequire} from "@webpack";
+import {Filters, getByKeys, getBySource, getLazyByKeys, getModule, webpackRequire} from "@webpack";
 import Logger from "@common/logger";
 import React, {type ReactNode} from "react";
 import DiscordModules from "@modules/discordmodules";
@@ -30,26 +30,26 @@ interface MenuItemIndicator {
     [key: string]: any;
 }
 
-type BadgeTypes = "beta" | "new" | "free_trial" | "early_access"
-type BadgeVariants = MenuItemColor
+type BadgeTypes = "beta" | "new" | "free_trial" | "early_access";
+type BadgeVariants = MenuItemColor;
 
 type MenuItemBadge = BadgeTypes | {
     type: BadgeTypes,
-    variant?: BadgeVariants
+    variant?: BadgeVariants;
 };
 
 type MenuItemAccessory =
-    | { type: "icon"; icon: React.ComponentType<any>; color?: string; className?: string; [key: string]: any }
-    | { type: "emoji"; emojiId?: string; src?: string; animated?: boolean }
-    | { type: "image"; src: string }
-    | { type: "avatar"; src: string }
-    | { type: "roleDot"; variant: "dot" | "pill"; color?: string; colors?: string[] }
-    | { type: "status"; status: string }
-    | { type: "guildTag"; element: React.ReactNode };
+    | {type: "icon"; icon: React.ComponentType<any>; color?: string; className?: string;[key: string]: any;}
+    | {type: "emoji"; emojiId?: string; src?: string; animated?: boolean;}
+    | {type: "image"; src: string;}
+    | {type: "avatar"; src: string;}
+    | {type: "roleDot"; variant: "dot" | "pill"; color?: string; colors?: string[];}
+    | {type: "status"; status: string;}
+    | {type: "guildTag"; element: React.ReactNode;};
 
 type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
 
-type CustomItemContext = { color: MenuItemColor; disabled?: boolean; isFocused: boolean }
+type CustomItemContext = {color: MenuItemColor; disabled?: boolean; isFocused: boolean;};
 export type BaseMenuItemProps = Record<string, any> & {
     label: LabelOrRenderable;
     id: string;
@@ -166,6 +166,10 @@ interface MenuItemGroup {
     items: MenuItem[];
 }
 
+interface MenuGroup {
+    id?: string;
+}
+
 type MenuItem = MenuItemSeparator | MenuItemSubmenu | MenuItemDefault | MenuItemRadio | MenuItemCheckbox | MenuItemControl | MenuItemGroup;
 
 interface ContextMenuComponents {
@@ -173,7 +177,7 @@ interface ContextMenuComponents {
     MenuCheckboxItem: React.FC<React.PropsWithChildren<MenuCheckboxItemProps>>;
     MenuRadioItem: React.FC<React.PropsWithChildren<MenuRadioItemProps>>;
     MenuControlItem: React.FC<React.PropsWithChildren<MenuControlItemProps>>;
-    MenuGroup: React.FC<React.PropsWithChildren>;
+    MenuGroup: React.FC<React.PropsWithChildren<MenuGroup>>;
     MenuItem: React.FC<React.PropsWithChildren<BaseMenuItemProps>>;
     Menu: React.FC<React.PropsWithChildren<MenuRenderProps>>;
 }
@@ -257,10 +261,14 @@ const ContextMenuActions = (() => {
     const out: any = {};
 
     try {
-        Object.assign(out, getMangled(Filters.bySource("new DOMRect", "CONTEXT_MENU_CLOSE"), {
-            closeContextMenu: Filters.byStrings("CONTEXT_MENU_CLOSE"),
-            openContextMenu: Filters.byStrings("renderLazy")
-        }, {searchDefault: false, cacheId: "core-contextmenu-Actions"}));
+        Object.assign(out, getBySource(["new DOMRect", "CONTEXT_MENU_CLOSE"], {
+            searchDefault: false,
+            cacheId: "core-contextmenu-Actions",
+            map: {
+                closeContextMenu: Filters.byStrings("CONTEXT_MENU_CLOSE"),
+                openContextMenu: Filters.byStrings("renderLazy")
+            }
+        }));
 
         startupComplete &&= typeof (out.closeContextMenu) === "function" && typeof (out.openContextMenu) === "function";
     }
@@ -360,9 +368,9 @@ class MenuPatcher {
         named: Record<string, Set<PatchCallback>>,
         regex: Array<{regex: RegExp, patches: Set<PatchCallback>;}>;
     } = {
-        named: {},
-        regex: []
-    };
+            named: {},
+            regex: []
+        };
 
     static handleRender<T extends React.ComponentType<MenuRenderProps>>(Component: T): T {
         const fNode = {type: Component} as MenuRenderNode;
@@ -415,8 +423,33 @@ class MenuPatcher {
                 if (nodeProps?.navId ?? nodeProps?.children?.props?.navId) {
                     MenuPatcher.runPatches(nodeProps.navId ?? nodeProps?.children?.props?.navId, res as any, props, instance);
                 }
+                else if (typeof (res.props as any)?.children === "function") {
+                    const children = (res.props as any).children;
+
+                    res = React.cloneElement(res, {
+                        // @ts-expect-error does exist
+                        children: (...args: any[]) => {
+                            const child = children(...args);
+
+                            if (React.isValidElement(child)) {
+                                const cProps = child.props as any;
+                                const layer = typeof cProps?.children === "object" ? cProps.children : child;
+
+
+                                if (cProps?.navId ?? cProps?.children?.props?.navId) {
+                                    MenuPatcher.runPatches(cProps.navId ?? cProps?.children?.props?.navId, child as any, props, instance);
+                                }
+                                else if (layer?.type && typeof layer.type !== "string") {
+                                    MenuPatcher.patchRecursive(layer, depth);
+                                }
+                            }
+
+                            return child;
+                        }
+                    });
+                }
                 else {
-                    const layer = nodeProps?.children ? nodeProps.children : res;
+                    const layer = typeof nodeProps?.children === "object" ? nodeProps.children : res;
 
                     if (layer?.type && typeof layer.type !== "string") {
                         MenuPatcher.patchRecursive(layer, depth);
