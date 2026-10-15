@@ -95,13 +95,11 @@ function getPluginInfo(pluginName: string): PluginInfo | null {
     }
 }
 
-function purgeChildren(ret)
-{
+function purgeChildren(ret) {
     ret.props.action.props.children = [];
 }
 
-function ErrorButtons({instance}: {instance: ErrorBoundary})
-{
+function ErrorButtons({instance}: {instance: ErrorBoundary;}) {
     const recover = React.useCallback(() => {
         attemptRecovery().then((_) => {
             instance.setState({info: null, error: null});
@@ -115,8 +113,7 @@ function ErrorButtons({instance}: {instance: ErrorBoundary})
     </Flex>;
 }
 
-function ErrorDetails({instance, pluginInfo, stack}: {instance: ErrorBoundary, pluginInfo: PluginInfo | null, stack: React.ReactNode | null})
-{
+function ErrorDetails({instance, pluginInfo, stack}: {instance: ErrorBoundary, pluginInfo: PluginInfo | null, stack: React.ReactNode | null;}) {
     const [isExpanded, setIsExpanded] = React.useState(false);
     const [copied, setCopied] = React.useState(false);
     const timeout = React.useRef<number>(0);
@@ -189,38 +186,46 @@ function ErrorDetails({instance, pluginInfo, stack}: {instance: ErrorBoundary, p
     }, [instance, pluginInfo]);
 
     return <div className={"bd-recovery-container"}>
+        {!!pluginInfo && <div className={"bd-recovery-suspect"}>
+            <span className={"bd-suspected-label"}>{t("Recovery.suspect")}</span>
+            <span className={"bd-suspected-plugin"}>
+                <MessageCircleWarningIcon size={14} />
+                {pluginInfo.name}
+                <span className={"bd-suspected-version"}>v{pluginInfo.version}</span>
+            </span>
+            <div className={"bd-recovery-links"}>
+                {!!pluginInfo.githubUrl &&
+                    <div className={"bd-recovery-tooltip"} aria-label={t("Recovery.report")}>
+                        <GithubIcon className={"bd-recovery-link"} onClick={openReport} size={24} />
+                    </div>
+                }
+                {!!pluginInfo.invite &&
+                    <div className={"bd-recovery-tooltip"} aria-label={t("Recovery.joinSupport")}>
+                        <Server className={"bd-recovery-link"} onClick={() => {
+                            recover();
+                            Modals.showGuildJoinModal(pluginInfo?.invite as string);
+                        }} size={24} />
+                    </div>
+                }
+            </div>
+        </div>}
+
         <Flex className={"bd-recovery-header"}>
             <div className={"bd-recovery-toggle"} aria-expanded={isExpanded} onClick={() => setIsExpanded(v => !v)}>
                 <span>{isExpanded ? "Hide Error Details" : "Show Error Details"}</span>
-                {isExpanded ? <ChevronDown size={16}/> : <ChevronRightIcon size={16}/>}
+                {isExpanded ? <ChevronDown size={16} /> : <ChevronRightIcon size={16} />}
             </div>
             <Button color={"bd-button-color-white"} onClick={copy}>
                 <Flex align={Flex.Align.CENTER} style={{gap: "6px"}}>
-                    {copied ? <Check size={16}/> : <Copy size={16}/>}
+                    {copied ? <Check size={16} /> : <Copy size={16} />}
                     <span>{copied ? "Copied" : "Copy"}</span>
                 </Flex>
             </Button>
         </Flex>
 
-        {!!pluginInfo && <div className={"bd-recovery-suspect"}>
-            <span className={"bd-suspected-label"}>{t("Recovery.suspect")}</span>
-            <span className={"bd-suspected-plugin"}>
-                <MessageCircleWarningIcon size={14}/>
-                {pluginInfo.name}
-                <span className={"bd-suspected-version"}>v{pluginInfo.version}</span>
-            </span>
-            <div className={"bd-recovery-links"}>
-                {!!pluginInfo.githubUrl && <GithubIcon className={"bd-recovery-link"} onClick={openReport} size={24}/>}
-                {!!pluginInfo.invite && <Server className={"bd-recovery-link"} onClick={() => {
-                    recover();
-                    Modals.showGuildJoinModal(pluginInfo?.invite as string);
-                }} size={24}/>}
-            </div>
-        </div>}
-
 
         {isExpanded && <div className={"bd-recovery-details"}>
-            <div className={"bd-recovery-stack"}>{stack}</div>
+            <div className={"bd-recovery-stack bd-scroller-thin"}>{stack}</div>
         </div>}
     </div>;
 }
@@ -249,12 +254,12 @@ export default new class Recovery extends Builtin {
             const pluginInfo = match?.[2] ? getPluginInfo(`${match[2]}.plugin.js`) : null;
 
             retValue.props.action.props.children.push(
-                <ErrorButtons instance={errorInstance}/>
+                <ErrorButtons instance={errorInstance} />
             );
 
             retValue.props.action = [
                 retValue.props.action,
-                <ErrorDetails stack={parsedError} pluginInfo={pluginInfo} instance={errorInstance}/>
+                <ErrorDetails stack={parsedError} pluginInfo={pluginInfo} instance={errorInstance} />
             ];
         });
     }
